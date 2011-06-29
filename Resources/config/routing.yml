@@ -1,0 +1,61 @@
+# Editing Tools
+_etb:
+    pattern: /_etb
+    defaults: { _controller: lubo_content_manager.editor_controller:toolbarAction }
+
+# Pagetree
+_etb_pagetree_get_children:
+    pattern: /_etb/pagetree/get_children
+    defaults: { _controller: lubo_content_manager.pagetree_controller:getChildrenAction }
+_etb_pagetree_create:
+    pattern: /_etb/pagetree/create
+    defaults: { _controller: lubo_content_manager.pagetree_controller:createAction }
+_etb_pagetree_remove:
+    pattern: /_etb/pagetree/remove
+    defaults: { _controller: lubo_content_manager.pagetree_controller:removeAction }
+_etb_pagetree_rename:
+    pattern: /_etb/pagetree/rename
+    defaults: { _controller: lubo_content_manager.pagetree_controller:renameAction }
+_etb_pagetree_move:
+    pattern: /_etb/pagetree/move
+    defaults: { _controller: lubo_content_manager.pagetree_controller:moveAction }
+_etb_pagetree_set_default:
+    pattern: /_etb/pagetree/set_default
+    defaults: { _controller: lubo_content_manager.pagetree_controller:setDefaultAction }
+
+# Area Tools
+_etb_area_slot_create:
+    pattern: /_etb/slot/create
+    defaults: { _controller: lubo_content_manager.editor_controller:createSlotAction }
+_etb_area_slot_delete:
+    pattern: /_etb/slot/delete
+    defaults: { _controller: lubo_content_manager.editor_controller:deleteSlotAction }
+
+# Slot Controller
+_etb_slot_raw_text_save:
+    pattern: /_etb/slot/raw_text/save
+    defaults: { _controller: lubo_content_manager.slot_controller.raw_text_slot_controller:saveSlotAction }
+
+_etb_slot_markdown_save:
+    pattern: /_etb/slot/markdown/save
+    defaults: { _controller: lubo_content_manager.slot_controller.markdown_slot_controller:saveSlotAction }
+
+_etb_slot_menu_get_nodes:
+    pattern: /_etb/slot/menu/get_nodes
+    defaults: { _controller: lubo_content_manager.slot_controller.menu_slot_controller:getNodesAction }
+_etb_slot_menu_save:
+    pattern: /_etb/slot/menu/save
+    defaults: { _controller: lubo_content_manager.slot_controller.menu_slot_controller:saveSlotAction }
+
+
+homepage:
+    pattern:  /{_locale}
+    defaults: { _controller: lubo_content_manager.page_controller:indexAction, _locale: en }
+    requirements:
+        _locale: en|fr|de
+page:
+    pattern: /{_locale}/{slug}
+    defaults: { _controller: lubo_content_manager.page_controller:showAction, _locale: en }
+    requirements:
+        _locale: en|fr|de
+

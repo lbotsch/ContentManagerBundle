@@ -1,0 +1,47 @@
+/* LuboCM EditorTools loader */
+(function($) {
+    function getCss(url) {
+        var el=document.createElement('link');
+        el.setAttribute("rel","stylesheet");
+        el.setAttribute("type","text/css");
+        el.setAttribute("href", url);
+        document.getElementsByTagName("head")[0].appendChild(el);
+    }
+    
+    function getJs(url) {
+        var el=document.createElement('script');
+        el.setAttribute("type","text/javascript");
+        el.setAttribute("src", url);
+        document.getElementsByTagName("head")[0].appendChild(el);
+    }
+    
+    getCss("{{ asset('bundles/lubocontentmanager/css/editor_tools.css') }}");
+    $('#lubo_cm_etb_toolbar').append(' \
+<!-- BEGIN OF LUBO CONTENT MANAGER EDITOR TOOLBAR --> \
+<div style="clear: both; height: 80px;"></div> \
+\
+<div class="lubo-cm-etb-reset"> \
+\
+    <span style="display: inline-block; min-height: 24px; width: 40px; float: right;">&nbsp;</span> \
+\
+    <div id="lubo_cm_etb_toolbar_tools"> \
+        <span class="lubo-cm-etb-toolbar-item">Lubo ContentManager v1.0</span> \
+    </div> \
+    <!-- <span class="lubo-cm-etb-toolbar-item">TOOL</span> --> \
+    \
+    <span class="lubo-cm-etb-toolbar-close"> \
+        <img width="15" height="15" alt="Hide Toolbar" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6N0NEOTU1Mjc0OThFMTFFMDg3NzJBNTE2ODgwQzMxMzQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6N0NEOTU1Mjg0OThFMTFFMDg3NzJBNTE2ODgwQzMxMzQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3Q0Q5NTUyNTQ5OEUxMUUwODc3MkE1MTY4ODBDMzEzNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo3Q0Q5NTUyNjQ5OEUxMUUwODc3MkE1MTY4ODBDMzEzNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjHyj8cAAAFiSURBVHjajJPNSsNAFIVvfpZNFwXBkBACcdcqiFASNz6A4FYR4lYUX8ONb6C4EwRXvoFY4rYotCRLQwgk4CZSl/nx3mFSplmUHvjIzJk5YW5yRwqCADo6Rk6QA2QXmXJekTdxoyqMDeSeh0V5nBvkGblGfsXwNvKJbMF6nSNjZB/5k7n5uEGw1Q5yRwMKn4pHtSwLPM+Dfr/P5r1eD1zXZb6gKyqFwn7rSJIEuq6DoigwGo3YmJ6qqoJhGGxdkC/zj8HUNA2EYQhlWYIsy+A4DgvWdQ1RFLF1QWMKD0RnsVhAHMcrRSZJAkVRdGsfUPhHdDRNA9u2V3aZpsn8jnIKT8Sah8Ph8qh0AnrSnPxOzR8y//HLmrMsYzXPZjNI0xTm8zlUVQV5nndrfpF4e74jR7C5npCLtknOkO8Ng1PeotCGc2QPeVgTqpBb5JBas3sxyLjkR/L5rWo14f6X+LZ/AQYA+DZpzJCnQZ0AAAAASUVORK5CYII=" \
+            onclick="this.parentNode.parentNode.previousSibling.style.display = this.parentNode.parentNode.style.display = \'none\';" /> \
+    </span> \
+</div> \
+<!-- END OF LUBO CONTENT MANAGER EDITOR TOOLBAR --> \
+');
+    getJs('{{ asset('bundles/lubocontentmanager/js/editor_tools.js') }}');
+    {% for style in styles %}
+        getCss('{{ asset(style) }}');
+    {% endfor %}
+    {% for script in scripts %}
+        getJs('{{ asset(script) }}');
+    {% endfor %}
+    $('#lubo_cm_etb_toolbar').show();
+})(jQuery);

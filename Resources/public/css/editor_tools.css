@@ -1,0 +1,33 @@
+.lubo-cm-etb-reset {
+    position: fixed;
+    background-color: #f7f7f7;
+    background-image: -moz-linear-gradient(-90deg, #e4e4e4, #ffffff);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#e4e4e4), to(#ffffff));
+    bottom: 0;
+    left:0;
+    margin:0;
+    padding: 0;
+    z-index: 6000000;
+    width: 100%;
+    border-top: 1px solid #bbb;
+    font: 11px Verdana, Arial, sans-serif;
+    text-align: left;
+    color: #2f2f2f;
+}
+.lubo-cm-etb-toolbar-item {white-space:nowrap; color:#2f2f2f; display:inline-block; min-height:24px; border-right:1px solid #cdcdcd; padding:5px 7px 5px 4px;}
+.lubo-cm-etb-toolbar-close {display:block; position:absolute; top:12px; right:10px; width:14px; height:14px; cursor: pointer;}
+.lubo-cm-etb-area {border: 1px dashed #ccc;}
+.lubo-cm-etb-area-toolbar, .lubo-cm-etb-area-slot-toolbar {
+    background-color: #f7f7f7;
+    background-image: -moz-linear-gradient(-90deg, #e4e4e4, #ffffff);
+    background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#e4e4e4), to(#ffffff));
+    width: 100%;min-height:13px;
+    font: 10px Verdana, Arial, sans-serif;
+    position: relative;
+}
+.lubo-cm-etb-area-toolbar-tool {display:inline-block;padding:2px 5px;border-right:1px solid #cdcdcd;}
+.lubo-cm-etb-area-notice {background: #ffe166;}
+.lubo-cm-etb-area-info {display:block;position:absolute;top:5px;right:10px;font-style:italic;}
+.lubo-cm-etb-area-create-slot {position:relative;}
+.lubo-cm-etb-area-slot {margin:5px 0;border:1px #ccc dashed;}
+.lubo-cm-etb-area-slot-toolbar {}

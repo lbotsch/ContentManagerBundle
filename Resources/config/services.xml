@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+ 
+    <parameters>
+        <parameter key="lubo_content_manager.slot_engine.class">Lubo\ContentManagerBundle\SlotEngine</parameter>
+        <parameter key="lubo_content_manager.default_page_type">Default</parameter>
+        <parameter key="lubo_content_manager.editing_mode">false</parameter>
+    </parameters>
+ 
+    <services>
+        <service id="lubo_content_manager.page_controller" 
+                 class="Lubo\ContentManagerBundle\Controller\PageController">
+             <argument type="string">%lubo_content_manager.default_page_type%</argument>
+             <call method="setContainer">
+                <argument type="service" id="service_container" />
+             </call>
+        </service>
+        
+        <service id="lubo_content_manager.slot_engine"
+                class="%lubo_content_manager.slot_engine.class%">
+            
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+ 
+        <service id="lubo_content_manager.twig.page_area_extension"
+                class="Lubo\ContentManagerBundle\Twig\PageAreaExtension">
+            <tag name="twig.extension" />
+            <argument type="service" id="lubo_content_manager.slot_engine" />
+            <argument type="string">%lubo_content_manager.editing_mode%</argument>
+        </service>
+        
+        <!-- SlotControllers -->
+        <service id="lubo_content_manager.slot_controller.raw_text_slot_controller"
+                class="Lubo\ContentManagerBundle\SlotController\RawTextController">
+            <tag name="lubo_content_manager.slot_controller" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        
+        <service id="lubo_content_manager.slot_controller.markdown_slot_controller"
+                class="Lubo\ContentManagerBundle\SlotController\MarkdownController">
+            <tag name="lubo_content_manager.slot_controller" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        
+        <service id="lubo_content_manager.slot_controller.menu_slot_controller"
+                class="Lubo\ContentManagerBundle\SlotController\MenuController">
+            <tag name="lubo_content_manager.slot_controller" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        
+    </services>
+</container>

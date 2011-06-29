@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="lubo_content_manager.editor_toolbar.class">Lubo\ContentManagerBundle\EventListener\EditorToolbarListener</parameter>
+        <parameter key="lubo_content_manager.editor_controller.class">Lubo\ContentManagerBundle\Controller\EditorController</parameter>
+        <parameter key="lubo_content_manager.pagetree_controller.class">Lubo\ContentManagerBundle\Controller\PagetreeController</parameter>
+    </parameters>
+
+    <services>
+        <service id="lubo_content_manager.editor_toolbar" class="%lubo_content_manager.editor_toolbar.class%">
+            <tag name="kernel.listener" event="core.response" method="onCoreResponse" priority="-128" />
+            <argument type="service" id="templating.engine.twig" />
+        </service>
+        
+        <service id="lubo_content_manager.editor_controller" class="%lubo_content_manager.editor_controller.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        
+        <service id="lubo_content_manager.pagetree_controller" class="%lubo_content_manager.pagetree_controller.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+            <call method="setDefaultPageType">
+                <argument type="string">%lubo_content_manager.default_page_type%</argument>
+            </call>
+        </service>
+    </services>
+    
+</container>

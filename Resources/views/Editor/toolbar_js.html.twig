@@ -1,0 +1,10 @@
+<div id="lubo_cm_etb_toolbar" style="display: none"></div>
+<script type="text/javascript" src="{{ asset('bundles/lubocontentmanager/js/libs/jquery.jstree.js') }}"></script>
+<script type="text/javascript">
+    $(function () {
+        var el=document.createElement('script');
+        el.setAttribute("type","text/javascript");
+        el.setAttribute("src", '{{ path("_etb") }}');
+        document.getElementsByTagName("head")[0].appendChild(el);
+    });
+</script>
