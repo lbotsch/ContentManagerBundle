@@ -7,7 +7,7 @@ require_once(__DIR__ . "/markdown.php");
 use Lubo\ContentManagerBundle\SlotControllerInterface;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Response;
-use Lubo\ContentManagerBundle\Entity\ContentSlot;
+use Lubo\ContentManagerBundle\Entity\Slot;
 
 
 class MarkdownController extends ContainerAware implements SlotControllerInterface
@@ -36,7 +36,7 @@ class MarkdownController extends ContainerAware implements SlotControllerInterfa
      * @param boolean $editTools Whether to include edit tools
      * @return string the rendered slot
      */
-    public function render(ContentSlot $slot, $editTools)
+    public function render(Slot $slot, $editTools)
     {
         $data = $slot->getData();
         $md = new \Markdown_Parser();

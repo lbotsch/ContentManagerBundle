@@ -44,8 +44,7 @@ class Area
     protected $page;
     
     /**
-     * @ORM\OneToMany(targetEntity="ContentSlot", mappedBy="area")
-     * @ORM\OrderBy({"lft" = "ASC"})
+     * @ORM\OneToMany(targetEntity="Slot", mappedBy="area")
      */
     protected $slots;
     

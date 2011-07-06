@@ -225,7 +225,7 @@ a:hover { color: #036; }
   text-align: justify;
 }
 header, footer {
-  width: 1000px;
+  width: 950px;
   margin: 10px 25px;
 }
 header {
@@ -273,8 +273,8 @@ footer nav li {
   min-width: 130px; text-align:center;
 }
 footer nav li a,
-footer nav li a:visited { color: inherit; text-decoration: none; }
-footer nav li:hover { background: url(../img/link_hover.png) top left no-repeat; }
+footer nav li a:visited { color: #0085ff !important; text-decoration: none; }
+footer nav li:hover { background: url(../img/link_hover.png) top left no-repeat; color: #0085ff !important; }
 
 footer nav li.active { background: url(../img/link_active.png) top left no-repeat; }
 

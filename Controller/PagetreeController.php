@@ -19,93 +19,89 @@ class PagetreeController extends BaseController
     public function getChildrenAction()
     {
         $request = $this->get("request");
-        $parentId = intval($request->query->get('id'));
-        $repository = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Node');
-        if ($parentId < 0) {
-            // Get root nodes
-            $nodes = $repository->getRootNodes();
-        } else {
-            $nodes = $repository->children($repository->find($parentId), true);
-        }
-        // Todo: include the whole tree
+        $path = $request->query->get('path');
+        $repository = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Page');
+        $pages = $repository->getPageTree($path);
+        
+        $data = $this->fillChildren($pages, $path);
+        return $this->getJsonResponse($data);
+    }
+    
+    private function fillChildren($nodes, $basePath="")
+    {
         $data = array();
-        foreach ($nodes as $node) {
+        foreach ($nodes as $key => $node) {
+            $id = is_array($node) ?
+                    str_replace("/", "-", str_replace(" ", "_", strtolower($basePath."/".$key)))
+                    : $node->getId();
+            $path = ($basePath ?: "/").(is_array($node) ? $key : "");
             $data[] = array(
                 "attr" => array(
-                    "id" => "treenode_".$node->getId(),
-                    "rel" => is_a($node, "Lubo\ContentManagerBundle\Entity\Page") ? "page" : "node",
-                    "data-url" => is_a($node, "Lubo\ContentManagerBundle\Entity\Page") ?
-                        $this->get('router')->generate("page", array("slug" => $node->getSlug()), false) : "",
-                    "title" => "Slug: ".$node->getSlug(),
+                    "id" => "treenode_".$id,
+                    "rel" => is_array($node) ? "node" : "page",
+                    "data-path" => $path,
+                    "data-url" => is_array($node) ?
+                        "" : $this->get('router')->generate("page", array("slug" => $node->getSlug()), false),
+                    "title" => "Path: ".$path.(is_array($node) ? "" : ", Slug: ".$node->getSlug()),
                 ),
-                "data" => $node->getTitle(),
-                "state" => (count($node->getChildren()) > 0 ? "open" : ""),
-                "children" => $this->fillChildren($node),
+                "data" => is_array($node) ? $key : $node->getTitle(),
+                "state" => is_array($node) ? "open" : "",
+                "children" => is_array($node) ? $this->fillChildren($node, $basePath."/".$key) : array(),
             );
             if (is_a($node, "Lubo\ContentManagerBundle\Entity\Page") && $node->isDefault()) {
                 $data[count($data) - 1]["attr"]["style"] = "font-weight:bold;";
             }
         }
-        
-        return $this->getJsonResponse($data);
-    }
-    
-    private function fillChildren($node)
-    {
-        $children = array();
-        foreach ($node->getChildren() as $child) {
-            $children[] = array(
+
+        if ($basePath == "") {
+            $data = array(
                 "attr" => array(
-                    "id" => "treenode_".$child->getId(),
-                    "rel" => is_a($child, "Lubo\ContentManagerBundle\Entity\Page") ? "page" : "node",
-                    "data-url" => is_a($child, "Lubo\ContentManagerBundle\Entity\Page") ?
-                        $this->get('router')->generate("page", array("slug" => $child->getSlug()), false) : "",
-                    "title" => "Slug: ".$child->getSlug(),
+                    "id" => "tree_root",
+                    "rel" => "root",
+                    "data-path" => "/",
+                    "data-url" => "",
+                    "title" => "Path: /"
                 ),
-                "data" => $child->getTitle(),
-                "state" => (count($child->getChildren()) > 0 ? "open" : ""),
-                "children" => array($this->fillChildren($child)),
+                "data" => "Root",
+                "state" => "open",
+                "children" => $data,
             );
-            if (is_a($child, "Lubo\ContentManagerBundle\Entity\Page") && $child->isDefault()) {
-                $children[count($children) - 1]["attr"]["style"] = "font-weight:bold;";
-            }
         }
-        return $children;
+        return $data;
     }
     
     public function createAction()
     {
         $request = $this->get("request");
-        $parentId = intval($request->request->get("parent"));
-        // Assume we always create as last child!
         $position = intval($request->request->get("position"));
         $title = $request->request->get("title");
-        $type = $request->request->get("type");
-        $parent = null;
-        if ($parentId > 0)
-            $parent = $this->getDoctrine()
-                ->getRepository("LuboContentManagerBundle:Node")
-                ->find($parentId);
+        $path = $request->request->get("path");
+        $pageType = $request->request->get("page_type") ?: $this->defaultPageType;
+        $defaultLocale = $this->container->getParameter('session.default_locale');
         
         // Create new node/page
-        $obj = null;
-        if ($type == "page") {
-            $obj = new Page();
-            $obj->setPageType($this->defaultPageType);
-        } else $obj = new Node();
+        $page = new Page();
+        $page->setPageType($pageType);
+        $page->setTitle($title);
+        $page->setPosition($position);
+        $page->setPath($path);
+        $page->setLocale($this->get('session')->getLocale());
         
-        $obj->setTitle($title);
-        $obj->setParent($parent);
-        $obj->setTranslatableLocale($this->get('session')->getLocale());
-        
-        $this->getDoctrine()->getEntityManager()->persist($obj);
+        $this->getDoctrine()->getEntityManager()->persist($page);
         $this->getDoctrine()->getEntityManager()->flush();
+        
+        if ($this->get('session')->getLocale() != $defaultLocale) {
+            $page->setTitle("New Page");
+            $page->setLocale($defaultLocale);
+            $this->getDoctrine()->getEntityManager()->persist($page);
+            $this->getDoctrine()->getEntityManager()->flush();
+        }
         
         $data = array(
             "status" => true,
-            "id" => $obj->getId(),
-            "url" => is_a($obj, "Lubo\ContentManagerBundle\Entity\Page") ?
-                $this->get('router')->generate("page", array("slug" => $obj->getSlug()), false) : ""
+            "id" => $page->getId(),
+            "path" => $page->getPath(),
+            "url" => $this->get('router')->generate("page", array("slug" => $page->getSlug()), false),
         );
         return $this->getJsonResponse($data);
     }
@@ -113,11 +109,17 @@ class PagetreeController extends BaseController
     public function removeAction()
     {
         $em = $this->getDoctrine()->getEntityManager();
-        $id = $this->get("request")->request->get("id");
-        
-        $obj = $em->find('LuboContentManagerBundle:Node', $id);
-        $em->remove($obj);
-        $em->flush();
+        $request = $this->get('request')->request;
+        if ($request->has('id')) {
+            $id = $request->get('id');
+            $obj = $em->find('LuboContentManagerBundle:Page', $id);
+            $em->remove($obj);
+            $em->flush();
+        } else {
+            $path = $request->get('path');
+            $repo = $em->getRepository('LuboContentManagerBundle:Page');
+            $repo->removeByPath($path);
+        }
         
         $data = array("status" => true);
         return $this->getJsonResponse($data);
@@ -129,25 +131,36 @@ class PagetreeController extends BaseController
         $id = intval($this->get("request")->request->get("id"));
         $title = $this->get("request")->request->get("title");
         
-        $obj = $em->find('LuboContentManagerBundle:Node', $id);
+        $obj = $em->find('LuboContentManagerBundle:Page', $id);
         $obj->setTitle($title);
-        $obj->setTranslatableLocale($this->get('session')->getLocale());
+        $obj->setLocale($this->get('session')->getLocale());
         
         $em->persist($obj);
         $em->flush();
+        $em->refresh($obj);
         
         $data = array(
             "status" => true,
-            "url" => is_a($obj, "Lubo\ContentManagerBundle\Entity\Page") ?
-                $this->get('router')->generate("page", array("slug" => $obj->getSlug()), false) : "",
-            "title" => $obj->getSlug()
+            "url" => $this->get('router')->generate("page", array("slug" => $obj->getSlug()), false),
+            "title" => "Slug: ".$obj->getSlug()
         );
         return $this->getJsonResponse($data);
     }
     
     public function moveAction()
     {
-        $data = array("status" => false);
+        $em = $this->getDoctrine()->getEntityManager();
+        $id = intval($this->get("request")->request->get("id"));
+        $path = $this->get("request")->request->get("path");
+        $position = intval($this->get("request")->request->get("position"));
+        
+        $page = $em->find('LuboContentManagerBundle:Page', $id);
+        $page->setPath($path);
+        $page->setPosition($position);
+        $em->persist($page);
+        $em->flush();
+        
+        $data = array("status" => true, "id" => $page->getId());
         return $this->getJsonResponse($data);
     }
     
@@ -156,8 +169,8 @@ class PagetreeController extends BaseController
         $em = $this->getDoctrine()->getEntityManager();
         $id = intval($this->get("request")->request->get("id"));
         
-        $obj = $em->find("LuboContentManagerBundle:Node", $id);
-        if (is_a($obj, "Lubo\ContentManagerBundle\Entity\Page") && !$obj->isDefault()) {
+        $obj = $em->find("LuboContentManagerBundle:Page", $id);
+        if (!$obj->isDefault()) {
             $old = $this->getDoctrine()->getRepository("LuboContentManagerBundle:Page")->findDefaultPage();
             $old->setDefault(false);
             $obj->setDefault(true);

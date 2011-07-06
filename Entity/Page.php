@@ -8,9 +8,23 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass="Lubo\ContentManagerBundle\Entity\Repository\PageRepository")
+ * @ORM\Table(name="page")
  */
-class Page extends Node
+class Page
 {
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    
+    /**
+     * @ORM\Column(type="text")
+     * @Gedmo\SortableGroup
+     */
+    protected $path;
+    
     /**
      * @ORM\Column(type="string", length="100")
      */
@@ -40,6 +54,20 @@ class Page extends Node
     protected $updated_at;
     
     /**
+     * @Gedmo\Sluggable
+     * @Gedmo\Translatable
+     * @ORM\Column(type="string", length="100")
+     */
+    protected $title;
+    
+    /**
+     * @Gedmo\Slug
+     * @Gedmo\Translatable
+     * @ORM\Column(type="string", length="100", unique=true)
+     */
+    protected $slug;
+    
+    /**
      * @ORM\OneToMany(targetEntity="Area", mappedBy="page")
      */
     protected $areas;
@@ -51,13 +79,35 @@ class Page extends Node
      */
     private $locale;
     
+    /**
+     * @Gedmo\SortablePosition
+     * @ORM\Column(type="integer")
+     */
+    private $position;
+    
     public function __construct()
     {
         $this->areas = new ArrayCollection();
-        $this->default = false;
+        $this->is_default = false;
+        $this->path = '/';
     }
     
     /* Getters / Setters */
+    
+    public function getId()
+    {
+        return $this->id;
+    }
+    
+    public function setPath($path)
+    {
+        $this->path = $path;
+    }
+    
+    public function getPath()
+    {
+        return $this->path;
+    }
     
     public function setPageType($page_type)
     {
@@ -89,8 +139,43 @@ class Page extends Node
         return $this->updated_at;
     }
     
-    public function setTranslatableLocale($locale)
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    public function getTitle()
+    {
+        return $this->title;
+    }
+    
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+    
+    public function getAreas()
+    {
+        return $this->areas;
+    }
+    
+    public function setLocale($locale)
     {
         $this->locale = $locale;
+    }
+    
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+    
+    public function setPosition($position)
+    {
+        $this->position = $position;
+    }
+    
+    public function getPosition()
+    {
+        return $this->position;
     }
 }

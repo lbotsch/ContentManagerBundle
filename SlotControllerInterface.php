@@ -2,7 +2,7 @@
 
 namespace Lubo\ContentManagerBundle;
 
-use Lubo\ContentManagerBundle\Entity\ContentSlot;
+use Lubo\ContentManagerBundle\Entity\Slot;
 
 interface SlotControllerInterface
 {
@@ -24,5 +24,5 @@ interface SlotControllerInterface
      * @param boolean $editTools Whether to include edit tools
      * @return string the rendered slot
      */
-    public function render(ContentSlot $slot, $editTools);
+    public function render(Slot $slot, $editTools);
 }

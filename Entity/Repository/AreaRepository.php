@@ -11,8 +11,9 @@ class AreaRepository extends EntityRepository
         $query = $this->getEntityManager()->createQuery(
             'SELECT a'.($lazy ? ' ': ', s ')
             .'FROM LuboContentManagerBundle:Area a '
-            .($lazy ? '' : 'LEFT JOIN a.slots s LEFT JOIN s.parent p')
-            .'WHERE a.page = :page OR (a.is_global = true AND a.page_type = :page_type)');
+            .($lazy ? '' : 'LEFT JOIN a.slots s ')
+            .'WHERE a.page = :page OR (a.is_global = true AND a.page_type = :page_type) '
+            .($lazy ? '' : 'ORDER BY s.position'));
         $query->setParameters(array(
             "page" => $page,
             "page_type" => $page->getPageType()

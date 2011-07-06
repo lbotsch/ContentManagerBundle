@@ -12,7 +12,7 @@
 
     <services>
         <service id="lubo_content_manager.editor_toolbar" class="%lubo_content_manager.editor_toolbar.class%">
-            <tag name="kernel.listener" event="core.response" method="onCoreResponse" priority="-128" />
+            <tag name="kernel.event_listener" event="kernel.response" method="onCoreResponse" priority="-128" />
             <argument type="service" id="templating.engine.twig" />
         </service>
         

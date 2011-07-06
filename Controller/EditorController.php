@@ -3,8 +3,7 @@
 namespace Lubo\ContentManagerBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
-use Lubo\ContentManagerBundle\Entity\VirtualSlot;
-use Lubo\ContentManagerBundle\Entity\ContentSlot;
+use Lubo\ContentManagerBundle\Entity\Slot;
 use Lubo\ContentManagerBundle\Entity\Area;
 use Doctrine\ORM\NoResultException;
 
@@ -51,8 +50,6 @@ class EditorController extends BaseController
         try {
             $area = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Area')
                     ->findOneAreaOfPage($page, $areaName, true);
-            $virtualSlot = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Slot')
-                    ->findVirtualSlot($area);
         } catch(NoResultException $e) {
             // Create area if it does not exist yet
             $area = new Area();
@@ -64,16 +61,14 @@ class EditorController extends BaseController
                 $area->setPage($page);
             }
             $em->persist($area);
-            // Create virtual slot for this area
-            $virtualSlot = new VirtualSlot();
-            $virtualSlot->setArea($area);
-            $em->persist($virtualSlot);
+            $em->flush();
         }
         
-        $slot = new ContentSlot();
+        $slot = new Slot();
         $slot->setSlotType($slotType);
         $slot->setArea($area);
-        $slot->setParent($virtualSlot);
+        $slot->setData("");
+        $slot->setLocale($this->get('session')->getLocale());
         
         $em->persist($slot);
         $em->flush();

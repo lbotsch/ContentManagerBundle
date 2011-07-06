@@ -36,41 +36,47 @@ class PageController extends BaseController
         $repo = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Page');
         if (!($page = $repo->findDefaultPage())) {
             if ($this->container->getParameter('lubo_content_manager.editing_mode')) {
-                // Create default pagetree
-                $node = new Node();
-                $node->setTitle("Default");
+                // Create default page
                 $page = new Page();
-                $page->setTitle("Page");
+                $page->setTitle("New Page");
                 $page->setDefault(true);
+                $page->setPath('/');
                 $page->setPageType($this->defaultPageType);
-                $page->setParent($node);
-                $em->persist($node);
+                $page->setLocale($this->container->getParameter('session.default_locale'));
                 $em->persist($page);
                 $em->flush();
+                //$em->refresh($page);
             } else {
                 throw $this->createNotFoundException();
             }
         }
         $this->get('logger')->debug('DefaultPage: slug='.$page->getSlug()
-            .', locale='.$page->getTranslatableLocale()
+            .', locale='.$page->getLocale()
             .', id='.$page->getId());
+        $slug = $page->getSlug();
+        //$em->clear();
+        
         $this->get('request')->attributes->set('slug', $page->getSlug());
-        return $this->forward('lubo_content_manager.page_controller:showAction', array('slug' => $page->getSlug()));
+        //return $this->forward('lubo_content_manager.page_controller:showAction', array('slug' => $page->getSlug()));
+        return $this->showAction($slug, $page);
     }
     
     /**
      * Show a page
      * @param $slug string The slug of the page to show
      */
-    public function showAction($slug)
+    public function showAction($slug, $page=null)
     {
         $em = $this->getDoctrine()->getEntityManager();
         $repo = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Page');
-        $page = $repo->findOneBySlug($slug);
-        if (!$page || !is_a($page, 'Lubo\ContentManagerBundle\Entity\Page')) {
+        if (is_null($page) || !is_a($page, 'Lubo\ContentManagerBundle\Entity\Page')) {
+            $page = $repo->findOneBySlug($slug);
+        }
+        if (!$page) {
             if ($this->container->getParameter('lubo_content_manager.editing_mode')) {
-                $dql = "SELECT p "
+                $dql = "SELECT p, a, s "
                         ."FROM LuboContentManagerBundle:Page p "
+                        ."LEFT JOIN p.areas a LEFT JOIN a.slots s "
                         ."WHERE p.id = "
                             ."(SELECT t.foreignKey "
                                 ."FROM StofDoctrineExtensionsBundle:Translation t "
@@ -95,13 +101,8 @@ class PageController extends BaseController
             }
         }
         
-        $logger = $this->get('logger');
-        $logger->debug('Getting areas of page');
-        $repo = $this->getDoctrine()->getRepository('LuboContentManagerBundle:Area');
-        $res = $repo->findAreasOfPage($page);
-        $logger->debug('Got areas of page');
         $areas = array();
-        foreach ($res as $area) {
+        foreach ($em->getRepository("LuboContentManagerBundle:Area")->findAreasOfPage($page) as $area) {
             $areas[$area->getName()] = $area;
         }
         

@@ -2,23 +2,20 @@
 
 namespace Lubo\ContentManagerBundle\Entity\Repository;
 
-use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
+use Doctrine\ORM\EntityRepository;
 use Lubo\ContentManagerBundle\Entity\Area;
+use Gedmo\Sortable\Entity\Repository\SortableRepository;
 
-class SlotRepository extends NestedTreeRepository
+class SlotRepository extends SortableRepository
 {
-    /**
-     * @throws Doctrine\ORM\NoResultException
-     * @throws Doctrine\ORM\NonUniqueResultException
-     */
-    public function findVirtualSlot(Area $area)
+    public function getAreaSlots(Area $area)
     {
         $query = $this->getEntityManager()->createQuery(
-            "SELECT s FROM LuboContentManagerBundle:VirtualSlot s"
-            ." WHERE s.area = :area AND s.parent IS NULL"
+            "SELECT s FROM LuboContentManagerBundle:Slot s"
+            ." WHERE s.area = :area ORDER BY s.position"
         );
         return $query->setParameters(array(
             "area" => $area
-        ))->getSingleResult();
+        ))->getResult();
     }
 }

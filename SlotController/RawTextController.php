@@ -5,7 +5,7 @@ namespace Lubo\ContentManagerBundle\SlotController;
 use Lubo\ContentManagerBundle\SlotControllerInterface;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Response;
-use Lubo\ContentManagerBundle\Entity\ContentSlot;
+use Lubo\ContentManagerBundle\Entity\Slot;
 
 
 class RawTextController extends ContainerAware implements SlotControllerInterface
@@ -34,7 +34,7 @@ class RawTextController extends ContainerAware implements SlotControllerInterfac
      * @param boolean $editTools Whether to include edit tools
      * @return string the rendered slot
      */
-    public function render(ContentSlot $slot, $editTools)
+    public function render(Slot $slot, $editTools)
     {
         return $slot->getData();
     }
@@ -47,9 +47,8 @@ class RawTextController extends ContainerAware implements SlotControllerInterfac
         $slotData = $request->request->get('data');
         
         $slot = $em->find('LuboContentManagerBundle:Slot', $slotId);
-        assert(is_a($slot, 'Lubo\ContentManagerBundle\Entity\ContentSlot'));
         $slot->setData($slotData);
-        $slot->setTranslatableLocale($this->container->get('session')->getLocale());
+        $slot->setLocale($this->container->get('session')->getLocale());
         $em->persist($slot);
         $em->flush();
         

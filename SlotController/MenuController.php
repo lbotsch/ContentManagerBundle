@@ -5,7 +5,7 @@ namespace Lubo\ContentManagerBundle\SlotController;
 use Lubo\ContentManagerBundle\SlotControllerInterface;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Response;
-use Lubo\ContentManagerBundle\Entity\ContentSlot;
+use Lubo\ContentManagerBundle\Entity\Slot;
 
 
 class MenuController extends ContainerAware implements SlotControllerInterface
@@ -34,16 +34,16 @@ class MenuController extends ContainerAware implements SlotControllerInterface
      * @param boolean $editTools Whether to include edit tools
      * @return string the rendered slot
      */
-    public function render(ContentSlot $slot, $editTools)
+    public function render(Slot $slot, $editTools)
     {
         $content = '';
         $nodes = array();
         if ($data = $slot->getData()) {
             $data = json_decode($data, true);
             $em = $this->container->get('doctrine')->getEntityManager();
-            $dql = 'SELECT n FROM LuboContentManagerBundle:Page n JOIN n.parent p WHERE p.id = :parent_id';
+            $dql = 'SELECT p FROM LuboContentManagerBundle:Page p WHERE p.path = :path';
             $query = $em->createQuery($dql);
-            $query->setParameter('parent_id', $data['parent']);
+            $query->setParameter('path', $data['path']);
             $query->setHint(\Doctrine\ORM\Query::HINT_CUSTOM_OUTPUT_WALKER,
                 'Gedmo\\Translatable\\Query\\TreeWalker\\TranslationWalker');
             $nodes = $query->getResult();
@@ -66,14 +66,17 @@ class MenuController extends ContainerAware implements SlotControllerInterface
         return $content;
     }
     
-    public function getNodesAction()
+    public function getPathsAction()
     {
-        $repo = $this->container->get('doctrine')->getRepository('LuboContentManagerBundle:Node');
-        $data = array("status" => true, "nodes" => array());
-        $nodes = $repo->findAll();
-        foreach ($nodes as $node) {
-            $data["nodes"][] = array("id" => $node->getId(), "title" => $node->getTitle());
+        $em = $this->container->get('doctrine')->getEntityManager();
+        $res = $em->createQuery("SELECT DISTINCT p.path FROM LuboContentManagerBundle:Page p ORDER BY p.path")
+                    ->getScalarResult();
+        $paths = array();
+        foreach ($res as $r) {
+            $paths[] = $r['path'];
         }
+        $data = array("status" => true, "paths" => $paths);
+        
         return new Response(json_encode($data), 200,
             array('content-type' => 'application/json; charset=utf-8'));
     }
@@ -83,15 +86,11 @@ class MenuController extends ContainerAware implements SlotControllerInterface
         $em = $this->container->get('doctrine')->getEntityManager();
         $request = $this->container->get('request');
         $slotId = $request->request->get('id');
-        $menuParent = $request->request->get('parent');
+        $path = $request->request->get('path');
         
-        $slot = $em->find('LuboContentManagerBundle:ContentSlot', $slotId);
-        if (!is_a($slot, 'Lubo\ContentManagerBundle\Entity\ContentSlot')) {
-            throw new \LogicException("Slot (id: $slotId) is of type ".get_class($slot). " but should be ContentSlot!");
-        }
-        assert(is_a($slot, 'Lubo\ContentManagerBundle\Entity\ContentSlot'));
-        $slot->setData(json_encode(array("parent" => $menuParent)));
-        $slot->setTranslatableLocale($this->container->get('session')->getLocale());
+        $slot = $em->find('LuboContentManagerBundle:Slot', $slotId);
+        $slot->setData(json_encode(array("path" => $path)));
+        $slot->setLocale($this->container->get('session')->getLocale());
         $em->persist($slot);
         $em->flush();
         

@@ -16,8 +16,8 @@
     }
     
     getCss("{{ asset('bundles/lubocontentmanager/css/editor_tools.css') }}");
-    $('#lubo_cm_etb_toolbar').append(' \
-<!-- BEGIN OF LUBO CONTENT MANAGER EDITOR TOOLBAR --> \
+    $('#lubo_cm_etb_toolbar').append(
+'<!-- BEGIN OF LUBO CONTENT MANAGER EDITOR TOOLBAR --> \
 <div style="clear: both; height: 80px;"></div> \
 \
 <div class="lubo-cm-etb-reset"> \
@@ -25,7 +25,9 @@
     <span style="display: inline-block; min-height: 24px; width: 40px; float: right;">&nbsp;</span> \
 \
     <div id="lubo_cm_etb_toolbar_tools"> \
-        <span class="lubo-cm-etb-toolbar-item">Lubo ContentManager v1.0</span> \
+        <span class="lubo-cm-etb-toolbar-item"> \
+            <img width="26" height="28" alt="Lubo ContentManager" style="border-width: 0;margin: 0 5px 0 10px;vertical-align: middle;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAcCAYAAAB/E6/TAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sHBRYHBRZT1+QAAASxSURBVEjHzZZfbFN1FMc/57a97RjbmLDRTcQH4zBx7bpqtuBwEggqIhKCQEKiyKJGDQIaQjTqgy8+iIiQCEYh/IkkEsV/MRCDIiobiK5ruwcGbgrbsj+EkbC6wbbeHh/W29whY0N88PvS9Hd/9/e533PPPecI11FZoNwECoB5wDwRqVTV6YABdAEREfkOOAS0ReORK6OdJaNdCAXD1UCNqq4QEY+qDt8gw7eoKiKS+U3DPlLVg7HGhoExQaFg2KOqG4EnRSQ/DdD0Yf/Yr6oqNh2uqOo3IrImGo90jgoqC5SbInIUmOl4Ur2ec5tnn5d+sFZgbqyxodneYDicTACOqOpMhwPGAbH3SDq0KiLTge9DwfAdI0ChYNilqm8BVeN0MBZUgemqujUUDOcCuACmFvofAN4GvI5434xERBCRO1X1jyJ/cYNRFij3As+JSA7/oXRYABtUdYIhIkXAcmfqjlcej4e8vLzM/8mTJ4+wZLsSkdlu4JH095BJ02XLl7F48SKmFEyh50IPp041MeOuEp6ueZYtWzdTMqOEc2fPceu0aRiGcOznWgoKCygtvZuLFy+yYf0rNDU1ZTJWVVe4gblONx98uJ3Kygp6e3tJDiUpLi6mZEYJIkJBQQGm1yQ3N5fSQCmxWJz8SZN4dOECEokEkfoIs+6fxQurn2fN6rXOjK02gMp0LGVVzVNUVlaw/5P9PPTgfObOmcf8hxfw+YEvAHB73Kx8YhU9PT0cOniIVStr2LRpMwCvv/YGa15cx5nTZ8jJySE7OztTQYApbsBvx/WxRQu5dOkS72x8l2QyCUBfXx87d+ykvb2dzo5OJk6ciMvloqurGwDT9ACQ6P3LmQk2wJbXUNWUHbasrCwsK5WB2Ors7GL3rj309/dn1gzDGLHHMGS0PAdQA/jTptfVHicvL5fHly7BNE18Ph8+n4/8W/JZ99JaqqruIyvLh2EYeL1eTNPMHDghHSoAt9uN1+d18q4QCoY/LguUaygY1tnVc7Sp6bSqqra1temJE79opD6iiURCVVW3vLdVW1tb1da297frurUvq6qqZVk6q6pam39vVlXVzz49oPeGKzQUDGtZoLzFNbXQ7xORJarKwMAAR3/4kY6ODsQw8Jom/f2X+fXkSfbs3stXX35NMmnR0txCLBbj2LE6znd3k0wmqas9Tv1vEVKaoqWlhbra45w9e87+avZJKBj2A2dUNUdEMnXO4/FgGAaqimVZWJaViYPL5QLIrLlcLlKpFKqaeXeWZamI2NW8ygAuqOquq6vC0NAQAwMDDA4OjoDYAOeaZVmZLEulUqRSKWdT/ElEokY0HkkCe4D2m6za1yqsQ6q6KRqP9BsAscaGiKpuAwavamT/qp46CuvedIsfbhMARf7iOlW9TUTucfQUudGK7Xgvh0VkdayxoXcEqKu7U4v8xd+mm2G1qsr1ZoVruXBA9gPPxBobzo/apssC5W4RmQ/sAAodw4mM5UJEBoH1wI5oPHJ5XONWWaA8X0TeVNWlIjIJMJ0zhgMyCPSp6hEReTUajzTf0FznBKaHxwrgdiA7beJyeoisBw5H45HWsQaJG1IoGPak3VixxoYU/zf9DcLIOQbBkNniAAAAAElFTkSuQmCC" /> \
+            Lubo ContentManager v1.0</span> \
     </div> \
     <!-- <span class="lubo-cm-etb-toolbar-item">TOOL</span> --> \
     \

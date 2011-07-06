@@ -6,16 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\Common\Collections\ArrayCollection;
 
-
 /**
- * @Gedmo\Tree(type="nested")
  * @ORM\Entity(repositoryClass="Lubo\ContentManagerBundle\Entity\Repository\SlotRepository")
  * @ORM\Table(name="slot")
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="discr", type="string")
- * @ORM\DiscriminatorMap({"virtual" = "VirtualSlot", "content" = "ContentSlot"})
  */
-abstract class Slot
+class Slot
 {
     /**
      * @ORM\Id
@@ -25,52 +20,39 @@ abstract class Slot
     protected $id;
     
     /**
-     * @Gedmo\TreeLeft
-     * @ORM\Column(name="lft", type="integer")
+     * @ORM\Column(type="string", length="100")
      */
-    protected $lft;
-
-    /**
-     * @Gedmo\TreeLevel
-     * @ORM\Column(name="lvl", type="integer")
-     */
-    protected $lvl;
-
-    /**
-     * @Gedmo\TreeRight
-     * @ORM\Column(name="rgt", type="integer")
-     */
-    protected $rgt;
+    protected $slot_type;
     
     /**
-     * @Gedmo\TreeRoot
-     * @ORM\Column(name="root", type="integer", nullable=true)
+     * @Gedmo\Translatable
+     * @ORM\Column(type="text")
      */
-    protected $root;
-
-    /**
-     * @Gedmo\TreeParent
-     * @ORM\ManyToOne(targetEntity="Slot", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $parent;
+    protected $data;
     
     /**
-     * @ORM\OneToMany(targetEntity="Slot", mappedBy="parent")
-     * @ORM\OrderBy({"lft" = "ASC"})
+     * @Gedmo\Locale
+     * Used locale to override Translation listener`s locale
+     * this is not a mapped field of entity metadata, just a simple property
      */
-    protected $children;
+    private $locale;
     
     /**
+     * @Gedmo\SortableGroup
      * @ORM\ManyToOne(targetEntity="Area", inversedBy="slots")
      * @ORM\JoinColumn(name="area_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $area;
     
+    /**
+     * @Gedmo\SortablePosition
+     * @ORM\Column(type="integer")
+     */
+    private $position;
     
     public function __construct()
     {
-        $this->children = new ArrayCollection();
+        $this->data = "";
     }
     
     /* Getters / Setters */
@@ -80,19 +62,34 @@ abstract class Slot
         return $this->id;
     }
     
-    public function setParent(Slot $parent)
+    public function setSlotType($type)
     {
-        $this->parent = $parent;    
-    }
-
-    public function getParent()
-    {
-        return $this->parent;   
+        $this->slot_type = $type;
     }
     
-    public function getChildren()
+    public function getSlotType()
     {
-        return $this->children;
+        return $this->slot_type;
+    }
+    
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+    
+    public function getData()
+    {
+        return $this->data;
+    }
+    
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
+    }
+    
+    public function getLocale()
+    {
+        return $this->locale;
     }
     
     public function setArea(Area $area)
@@ -104,4 +101,15 @@ abstract class Slot
     {
         return $this->area;
     }
+    
+    public function setPosition($position)
+    {
+        $this->position = $position;
+    }
+    
+    public function getPosition()
+    {
+        return $this->position;
+    }
 }
+    

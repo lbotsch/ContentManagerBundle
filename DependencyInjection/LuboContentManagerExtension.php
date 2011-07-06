@@ -25,6 +25,10 @@ class LuboContentManagerExtension extends Extension
  
         if (!array_key_exists('editor_tools', $config)) $config['editor_tools'] = array('enabled' => false);
         
+        if ($config['editor_tools']['enabled']) {
+            $loader->load('edit_tools.xml');
+        }
+        
         // Set default page type
         $container->setParameter('lubo_content_manager.default_page_type', $config['default_page_type']);
         $container->setParameter('lubo_content_manager.editing_mode', $config['editor_tools']['enabled']);
