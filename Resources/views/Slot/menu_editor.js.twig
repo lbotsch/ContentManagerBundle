@@ -1,0 +1,74 @@
+
+LuboCM.SlotTools.registerSlotType({
+    name: "menu",
+    slot_type: "Menu",
+    items: [
+        function(slot) {
+            return $('<button>Configure</button>').button({
+                icons: { primary: "ui-icon-gear" }
+            }).click(function() {
+                $.get(
+                    '/app_edit.php/_etb/slot/menu/get_paths',
+                    function(data) {
+                        if (data.status) {
+                            var panel = '<div><label>Select path:</label>'
+                                + '<select>';
+                            for (var i = 0, l = data.paths.length; i < l; i++) {
+                                panel += '<option value="' + data.paths[i] + '">'
+                                         + data.paths[i] + '</option>'
+                            }
+                            panel += '</select></div>';
+                            $(panel).dialog({
+                                modal: true,
+                                title: 'Configure Menu Slot',
+                                buttons: {
+                                    Ok: function() {
+                                        var self = this;
+                                        $.post(
+                                            '/app_edit.php/_etb/slot/menu/save',
+                                            {
+                                                id: $(slot).attr('data-slot-id'),
+                                                path: $('select:first', this).val()
+                                            },
+                                            function(data) {
+                                                if (!data.status) {
+                                                    $('<div>Could not save menu configuration!</div>').dialog({
+                                                        modal: true,
+                                                        title: 'Error!',
+                                                        buttons: {
+                                                            Ok: function() {
+                                                                $(this).dialog("close");
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    $('.lubo-cm-etb-area-slot-content', slot).html(data.html);
+                                                }
+                                                $(self).dialog("close");
+                                            },
+                                            'json'
+                                        );
+                                    },
+                                    Cancel: function() {
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            });
+                        } else {
+                            $('<div>Could not load configuration panel!</div>').dialog({
+                                modal: true,
+                                title: 'Error!',
+                                buttons: {
+                                    Ok: function() {
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    'json'
+                );
+            });
+        },
+    ],
+});

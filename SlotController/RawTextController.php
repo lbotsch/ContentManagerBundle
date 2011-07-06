@@ -39,6 +39,14 @@ class RawTextController extends ContainerAware implements SlotControllerInterfac
         return $slot->getData();
     }
     
+    public function renderEditor()
+    {
+        return $this->container->get('templating')
+            ->renderResponse('LuboContentManagerBundle:Slot:raw_text_editor.js.twig', array(
+                
+            ))->getContent();
+    }
+    
     public function saveSlotAction()
     {
         $em = $this->container->get('doctrine')->getEntityManager();

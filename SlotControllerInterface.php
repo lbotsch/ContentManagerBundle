@@ -25,4 +25,10 @@ interface SlotControllerInterface
      * @return string the rendered slot
      */
     public function render(Slot $slot, $editTools);
+    
+    /**
+     * Render the slot editor script.
+     * @return string the editor script
+     */
+    public function renderEditor();
 }

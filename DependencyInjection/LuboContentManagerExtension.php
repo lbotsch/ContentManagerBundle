@@ -50,6 +50,19 @@ class LuboContentManagerExtension extends Extension
         if ($config['editor_tools']['enabled']) {
             $loader->load('edit_tools.xml');
             $definition = $container->findDefinition('lubo_content_manager.editor_controller');
+            
+            // Add Pagetree
+            $definition->addMethodCall('addStyle', array('bundles/lubocontentmanager/css/pagetree.css'));
+            $definition->addMethodCall('addScript', array('route:_etb_pagetree_script'));
+            
+            // Add MediaManager
+            $definition->addMethodCall('addStyle', array('bundles/lubocontentmanager/css/media_manager.css'));
+            $definition->addMethodCall('addScript', array('route:_etb_media_manager_script'));
+            
+            // Add Slot Editor scripts
+            $definition->addMethodCall('addScript', array('route:_etb_area_slot_editors_script'));
+            
+            // Add custom styles/scripts
             foreach ($config['editor_tools']['styles'] as $style) {
                 $definition->addMethodCall('addStyle', array($style));
             }

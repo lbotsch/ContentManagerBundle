@@ -1,0 +1,16 @@
+if (typeof LuboCM != "undefined") {
+    LuboCM.Toolbar.MediaManager = function() {
+        
+    };
+    
+    LuboCM.Toolbar.addTool({
+        name: 'media_manager',
+        title: 'Media',
+        icon: 'ui-icon-video',
+        position: 1,
+        click: function(ev) {
+            alert('Opening MediaManager...');
+        },
+    });
+}
+

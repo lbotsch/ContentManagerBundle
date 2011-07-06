@@ -16,6 +16,19 @@ class PagetreeController extends BaseController
         $this->defaultPageType = $name;
     }
     
+    /**
+     * Return the main Pagetree script
+     */
+    public function getMainScriptAction()
+    {
+        $response = $this->container->get('templating')
+            ->renderResponse('LuboContentManagerBundle:Pagetree:main_script.js.twig', array(
+                
+            ));
+        $response->headers->set('content-type', 'text/javascript');
+        return $response;
+    }
+    
     public function getChildrenAction()
     {
         $request = $this->get("request");

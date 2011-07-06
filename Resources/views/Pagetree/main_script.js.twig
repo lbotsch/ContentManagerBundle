@@ -1,0 +1,356 @@
+if (typeof LuboCM != "undefined") {
+    LuboCM.Toolbar.NavigationTool = new function() {
+        
+        this.initialized = false;
+        
+        this.init = function(self) {
+            if (self.initialized) return;
+            
+            self.initialized = true;
+            
+            $("body").append("<div>");
+            self.container = $("body").children(":last");
+            self.container.attr({
+                id: 'lubo_cm_etb_tool_navigation_container',
+                title: 'Navigation'
+            });
+            
+            $.jstree._themes = "/bundles/lubocontentmanager/css/jstree/";
+            $('#lubo_cm_etb_tool_navigation_container').jstree({
+                "plugins" : [ 
+                    "themes","json_data","ui","crrm","dnd","contextmenu", "types"
+                ],
+                "json_data" : { 
+                    "ajax" : {
+                        "url" : "/app_edit.php/_etb/pagetree/get_children",
+                        "data" : function(n) {
+                            return {
+                                "path": n.attr ? n.attr("data-path") : "",
+                            };
+                        },
+                    }
+                },
+                "themes": {
+                    "theme": "default",
+                },
+                "crrm" : {
+                    "move" : {
+                        "default_position" : "last",
+                        "check_move" : function (m) {
+                            return ($(m.o[0]).attr('rel') === "page");
+                        }
+                    }
+                },
+                "contextmenu": {
+                    "items": function(node) {
+                        var items = {};
+                        var type = $(node).attr("rel");
+                        
+                        if (type == "page") {
+                            items["visit"] = {
+                                "label": "Visit Page",
+                                "action": function() {
+                                    window.location = $(node).attr("data-url");
+                                }
+                            };
+                            items["set_default"] = {
+                                "label": "Set Default",
+                                "action": function() {
+                                    var self = this;
+                                    $.ajax({
+                                        async : false,
+                                        type: 'POST',
+                                        url: "/app_edit.php/_etb/pagetree/set_default",
+                                        data : {
+                                            "id" : $(node).attr("id").replace("treenode_","")
+                                        }, 
+                                        success : function (r) {
+                                            if(r.status) {
+                                                self.refresh();
+                                            } else {
+                                                $('<div>The page could not be set as the default page! Do you have permission?</div>').dialog({
+                                                    modal: true,
+                                                    title: 'Error!',
+                                                    buttons: {
+                                                        Ok: function() {
+                                                            $(this).dialog("close");
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                },
+                                "separator_after": true,
+                            };
+                        }
+                        
+                        items["create_page"] = {
+                            "label": "Create Page",
+                            "action": function() {
+                                var tree = this;
+                                if (typeof self.createPageDialog == "undefined") {
+                                    self.createPageDialog = $('<div title="Create new Page">'
+                                    + '<p id="lubo_cm_etb_create_page_form_validate_tips"></p>'
+                                    + '<form><fieldset style="padding:0;border:0;margin-top:25px;">'
+                                    + '<label for="title" style="display:block;">Title</label>'
+                                    + '<input type="text" name="title" id="lubo_cm_etb_create_page_form_title" style="display:block;margin-bottom:12px;width:95%;padding: .4em;" class="ui-widget-content ui-corner-all" />'
+                                    + '<label for="path" style="display:block;">Path</label>'
+                                    + '<input type="text" name="path" id="lubo_cm_etb_create_page_form_path" style="display:block;margin-bottom:12px;width:95%;padding: .4em;" class="ui-widget-content ui-corner-all" />'
+                                    +'</fieldset></form></div>');
+                                    self.createPageDialog.dialog({
+                                        autoOpen: false,
+                                        height: 300,
+                                        width: 400,
+                                        modal: true,
+                                        buttons: {
+                                            'Create': function() {
+                                                var valid = true;
+                                                var title = $('input[name=title]', self.createPageDialog).attr('value');
+                                                var path = $('input[name=path]', self.createPageDialog).attr('value');
+                                                var tips = "";
+                                                if (title == "") {
+                                                    valid = false;
+                                                    tips += '<br><span style="color:red;"> - You must set a title!</span>';
+                                                }
+                                                if (path == "") {
+                                                    valid = false;
+                                                    tips += '<br><span style="color:red;"> - You must set a path (example: /)</span>';
+                                                }
+                                                $('#lubo_cm_etb_create_page_form_validate_tips', self.createPageDialog).html(tips).addClass( "ui-state-highlight" );
+                                                setTimeout(function() {
+                                                    $('#lubo_cm_etb_create_page_form_validate_tips', self.createPageDialog).removeClass( "ui-state-highlight", 1500 );
+                                                }, 1000 );
+                                                if (valid) {
+                                                    // Create path
+                                                    tree.create(node, "last", {
+                                                        "attr": {
+                                                            "rel": "page",
+                                                            "data-path": path,
+                                                        },
+                                                        "data": title
+                                                    }, null, true);
+                                                    $(this).dialog("close");
+                                                }
+                                            },
+                                            'Cancel': function() {
+                                                $(this).dialog("close");
+                                            }
+                                        }
+                                    });
+                                }
+                                $('#lubo_cm_etb_create_page_form_validate_tips', self.createPageDialog).text('All fields are required.');
+                                $('input[name=title]', self.createPageDialog).attr('value', '');
+                                $('input[name=path]', self.createPageDialog).attr('value', node.attr('data-path'));
+                                self.createPageDialog.dialog("open");
+                            },
+                            "separator_after": true,
+                        };
+                        
+                        if (type == "page") {
+                            items["rename"] = {
+                                "label": "Rename",
+                                "action": function() {
+                                    this.rename(node);
+                                }
+                            };
+                        }
+                        
+                        if (type == "page" || type == "node") {
+                            items["delete"] = {
+                                "label": "Delete",
+                                "action": function() {
+                                    this.remove(node);
+                                }
+                            };
+                        }
+                        
+                        return items;
+                    },
+                },
+                "types": {
+                    "valid_children" : [ "root" ],
+                    "types": {
+                        "root": {
+                            "valid_children": ["node", "page"],
+                        },
+                        "node": {
+                            "icon": { "image": "/bundles/lubocontentmanager/img/icon_folder.png" },
+                            "valid_children" : [ "node", "page" ],
+                        },
+                        "page": {
+                            "icon": { "image": "/bundles/lubocontentmanager/img/icon_page.png" },
+                            "valid_children" : [],
+                        }
+                    }
+                },
+            }).bind("create.jstree", function (e, data) {
+                if (data.rslt.obj.attr("rel") != "page") {
+                    return;
+                }
+                
+                $.post(
+                    "/app_edit.php/_etb/pagetree/create", 
+                    {
+                        "path": data.rslt.obj.attr("data-path"),
+                        "position" : data.rslt.position,
+                        "title" : data.rslt.name,
+                    }, 
+                    function (r) {
+                        if(r.status) {
+                            data.inst.refresh();
+                        }
+                        else {
+                            $.jstree.rollback(data.rlbk);
+                            $('<div>The page could not be created! Do you have permission?</div>').dialog({
+                                modal: true,
+                                title: 'Error!',
+                                buttons: {
+                                    Ok: function() {
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            });
+                        }
+                    }
+                );
+            }).bind("remove.jstree", function (e, data) {
+                data.rslt.obj.each(function () {
+                    var data = { "path": $(this).attr('data-path') };
+                    if ($(this).attr('rel') == "page") {
+                        data['id'] = this.id.replace("treenode_","");
+                    }
+                    $.ajax({
+                        async : false,
+                        type: 'POST',
+                        url: "/app_edit.php/_etb/pagetree/remove",
+                        data : data, 
+                        success : function (r) {
+                            if(!r.status) {
+                                data.inst.refresh();
+                                $('<div>The page could not be deleted! Do you have permission?</div>').dialog({
+                                    modal: true,
+                                    title: 'Error!',
+                                    buttons: {
+                                        Ok: function() {
+                                            $(this).dialog("close");
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            })
+            .bind("rename.jstree", function (e, data) {
+                $.post(
+                    "/app_edit.php/_etb/pagetree/rename", 
+                    {
+                        "id" : $(data.rslt.obj).attr("id").replace("treenode_",""),
+                        "title" : data.rslt.new_name
+                    }, 
+                    function (r) {
+                        if(!r.status) {
+                            $.jstree.rollback(data.rlbk);
+                            $('<div>The page could not be renamed! Do you have permission?</div>').dialog({
+                                modal: true,
+                                title: 'Error!',
+                                buttons: {
+                                    Ok: function() {
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            });
+                        } else {
+                            $(data.rslt.obj).attr("data-url", r.url);
+                            $(data.rslt.obj).attr("title", r.title);
+                        }
+                    }
+                );
+            })
+            .bind("move_node.jstree", function (e, data) {
+                data.rslt.o.each(function (i) {
+                    var position = data.rslt.cp + i;
+                    if (data.rslt.np == data.rslt.op || data.rslt.cp > $('li[rel=page]', $(this).parent()).index(this)) {
+                        position -= 1;
+                    }
+                    $.ajax({
+                        async : false,
+                        type: 'POST',
+                        url: "/app_edit.php/_etb/pagetree/move",
+                        data : {
+                            "id" : $(this).attr("id").replace("treenode_",""), 
+                            "path" : $(data.rslt.np).attr("data-path"), 
+                            "position" : position,
+                        },
+                        success : function (r) {
+                            if(!r.status) {
+                                $.jstree.rollback(data.rlbk);
+                                $('<div>The page could not be moved! Do you have permission?</div>').dialog({
+                                    modal: true,
+                                    title: 'Error!',
+                                    buttons: {
+                                        Ok: function() {
+                                            $(this).dialog("close");
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                $(data.rslt.oc).attr("id", "treenode_" + r.id);
+                                $(data.rslt.oc).attr("data-path", $(data.rslt.np).attr("data-path"));
+                                if(data.rslt.cy && $(data.rslt.oc).children("UL").length) {
+                                    data.inst.refresh(data.inst._get_parent(data.rslt.oc));
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+            
+            $('#lubo_cm_etb_tool_navigation_container').dialog({
+                autoOpen: false,
+                buttons: {
+                    'Reload': function() {
+                        $(this).jstree("refresh");
+                    },
+                    'Close': function() {$(this).dialog('close');},
+                },
+                /*modal: true,*/
+                width: 400,
+            });
+        };
+        
+        var self = this;
+        
+        this.show = function() {
+            if (!self.initialized) self.init();
+            self.container.dialog('open');
+        };
+        
+        this.hide = function() {
+            if (!self.initialized) self.init();
+            self.container.dialog('close');
+        };
+        
+        this.toggle = function() {
+            if (!self.initialized) self.init(self);
+            if (self.container.dialog('isOpen')) {
+                self.hide();
+            } else {
+                self.show();
+            }
+        };
+    };
+    
+    LuboCM.Toolbar.addTool({
+        name: 'navigation',
+        title: 'Navigation',
+        icon: 'ui-icon-folder-open',
+        position: 0,
+        click: function(ev) {
+            LuboCM.Toolbar.NavigationTool.toggle();
+            return false;
+        },
+    });
+}

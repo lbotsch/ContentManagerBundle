@@ -46,6 +46,11 @@ class SlotEngine extends ContainerAware
         return $this->slotControllers[$id];
     }
     
+    public function getSlotControllers()
+    {
+        return $this->slotControllers;
+    }
+    
     /**
      * Render a slot
      * @param Slot $slot Slot object

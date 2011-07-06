@@ -41,7 +41,7 @@ class MenuController extends ContainerAware implements SlotControllerInterface
         if ($data = $slot->getData()) {
             $data = json_decode($data, true);
             $em = $this->container->get('doctrine')->getEntityManager();
-            $dql = 'SELECT p FROM LuboContentManagerBundle:Page p WHERE p.path = :path';
+            $dql = 'SELECT p FROM LuboContentManagerBundle:Page p WHERE p.path = :path ORDER BY p.position';
             $query = $em->createQuery($dql);
             $query->setParameter('path', $data['path']);
             $query->setHint(\Doctrine\ORM\Query::HINT_CUSTOM_OUTPUT_WALKER,
@@ -64,6 +64,14 @@ class MenuController extends ContainerAware implements SlotControllerInterface
         }
         
         return $content;
+    }
+
+    public function renderEditor()
+    {
+        return $this->container->get('templating')
+            ->renderResponse('LuboContentManagerBundle:Slot:menu_editor.js.twig', array(
+                
+            ))->getContent();
     }
     
     public function getPathsAction()

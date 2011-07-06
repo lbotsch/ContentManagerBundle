@@ -43,6 +43,14 @@ class MarkdownController extends ContainerAware implements SlotControllerInterfa
         return $md->transform($data);
     }
     
+    public function renderEditor()
+    {
+        return $this->container->get('templating')
+            ->renderResponse('LuboContentManagerBundle:Slot:markdown_editor.js.twig', array(
+                
+            ))->getContent();
+    }
+    
     public function saveSlotAction()
     {
         $em = $this->container->get('doctrine')->getEntityManager();

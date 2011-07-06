@@ -23,20 +23,6 @@ if (typeof window.LuboCM == "undefined") {
         this.Toolbar.init = function() {
             // Initialize Tools for the Editor Toolbar
             var self = this;
-            
-            this.addTool({
-                name: 'navigation',
-                title: 'Navigation',
-                click: function(ev) {
-                    if (typeof self.navigationTool == "undefined") {
-                        console.log("Initializing Navigation tool...");
-                        self.navigationTool = new self.NavigationTool();
-                    }
-                    self.navigationTool.toggle();
-                    return false;
-                },
-            });
-            
         };
         
         this.Toolbar.addTool = function(config) {
@@ -48,6 +34,8 @@ if (typeof window.LuboCM == "undefined") {
             config = $.extend(true, {
                 id: id,
                 title: config.name,
+                class: '',
+                icon: '',
                 click: function() {return false;},
                 position: 'last'
             }, config);
@@ -56,358 +44,31 @@ if (typeof window.LuboCM == "undefined") {
             var button = null;
             var tools = $('#lubo_cm_etb_toolbar_tools');
             if (config.position == 'first') {
-                tools.prepend('<span>');
-                button = tools.children(':first');
+                tools.prepend('<span class="lubo-cm-etb-toolbar-item"><button></span>');
+                button = tools.children(':first').children(':first');
+            } else if (config.position == 'last' || tools.children().length < config.position + 1) {
+                tools.append('<span class="lubo-cm-etb-toolbar-item"><button></span>');
+                button = tools.children(':last').children(':first');
             } else {
-                tools.append('<span>');
-                button = tools.children(':last');
+                button = $('<span class="lubo-cm-etb-toolbar-item"><button></span>');
+                $(tools.children()[config.position]).before(button);
+                button = button.children(':first');
             }
             button.attr({
                 id: config.id,
                 title: config.title,
-                class: 'lubo-cm-etb-toolbar-item',
-            }).append('<a>');
-            button.children(':last').attr({
-                href: '#',
-            }).text(config.title).click(config.click);
+                class: config.class,
+            }).text(config.title).click(config.click).button({
+                icons: { primary: config.icon }
+            });
+            config["button"] = button;
+            
             $.merge(this.tools, [config]);
         };
             
             /******** TOOLS ********/
             
-        this.Toolbar.NavigationTool = function() {
-            
-            $("body").append("<div>");
-            this.container = $("body").children(":last");
-            this.container.attr({
-                id: 'lubo_cm_etb_tool_navigation_container',
-                title: 'Navigation'
-            });
-            var self = this;
-            
-            $.jstree._themes = "/bundles/lubocontentmanager/css/jstree/";
-            $('#lubo_cm_etb_tool_navigation_container').jstree({
-                "plugins" : [ 
-                    "themes","json_data","ui","crrm","dnd","contextmenu", "types"
-                ],
-                "json_data" : { 
-                    "ajax" : {
-                        "url" : "/app_edit.php/_etb/pagetree/get_children",
-                        "data" : function(n) {
-                            return {
-                                "path": n.attr ? n.attr("data-path") : "",
-                            };
-                        },
-                    }
-                },
-                "themes": {
-                    "theme": "default",
-                },
-                "crrm" : {
-                    "move" : {
-                        "default_position" : "last",
-                        "check_move" : function (m) {
-                            return ($(m.o[0]).attr('rel') === "page");
-                        }
-                    }
-                },
-                "contextmenu": {
-                    "items": function(node) {
-                        var items = {};
-                        var type = $(node).attr("rel");
-                        
-                        if (type == "page") {
-                            items["visit"] = {
-                                "label": "Visit Page",
-                                "action": function() {
-                                    window.location = $(node).attr("data-url");
-                                }
-                            };
-                            items["set_default"] = {
-                                "label": "Set Default",
-                                "action": function() {
-                                    var self = this;
-                                    $.ajax({
-                                        async : false,
-                                        type: 'POST',
-                                        url: "/app_edit.php/_etb/pagetree/set_default",
-                                        data : {
-                                            "id" : $(node).attr("id").replace("treenode_","")
-                                        }, 
-                                        success : function (r) {
-                                            if(r.status) {
-                                                self.refresh();
-                                            } else {
-                                                $('<div>The page could not be set as the default page! Do you have permission?</div>').dialog({
-                                                    modal: true,
-                                                    title: 'Error!',
-                                                    buttons: {
-                                                        Ok: function() {
-                                                            $(this).dialog("close");
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                },
-                                "separator_after": true,
-                            };
-                        }
-                        
-                        items["create_page"] = {
-                            "label": "Create Page",
-                            "action": function() {
-                                var tree = this;
-                                if (typeof self.createPageDialog == "undefined") {
-                                    self.createPageDialog = $('<div title="Create new Page">'
-                                    + '<p id="lubo_cm_etb_create_page_form_validate_tips"></p>'
-                                    + '<form><fieldset style="padding:0;border:0;margin-top:25px;">'
-                                    + '<label for="title" style="display:block;">Title</label>'
-                                    + '<input type="text" name="title" id="lubo_cm_etb_create_page_form_title" style="display:block;margin-bottom:12px;width:95%;padding: .4em;" class="ui-widget-content ui-corner-all" />'
-                                    + '<label for="path" style="display:block;">Path</label>'
-                                    + '<input type="text" name="path" id="lubo_cm_etb_create_page_form_path" style="display:block;margin-bottom:12px;width:95%;padding: .4em;" class="ui-widget-content ui-corner-all" />'
-                                    +'</fieldset></form></div>');
-                                    self.createPageDialog.dialog({
-                                        autoOpen: false,
-                                        height: 300,
-                                        width: 400,
-                                        modal: true,
-                                        buttons: {
-                                            'Create': function() {
-                                                var valid = true;
-                                                var title = $('input[name=title]', self.createPageDialog).attr('value');
-                                                var path = $('input[name=path]', self.createPageDialog).attr('value');
-                                                var tips = "";
-                                                if (title == "") {
-                                                    valid = false;
-                                                    tips += '<br><span style="color:red;"> - You must set a title!</span>';
-                                                }
-                                                if (path == "") {
-                                                    valid = false;
-                                                    tips += '<br><span style="color:red;"> - You must set a path (example: /)</span>';
-                                                }
-                                                $('#lubo_cm_etb_create_page_form_validate_tips', self.createPageDialog).html(tips).addClass( "ui-state-highlight" );
-                                                setTimeout(function() {
-                                                    $('#lubo_cm_etb_create_page_form_validate_tips', self.createPageDialog).removeClass( "ui-state-highlight", 1500 );
-                                                }, 1000 );
-                                                if (valid) {
-                                                    // Create path
-                                                    tree.create(node, "last", {
-                                                        "attr": {
-                                                            "rel": "page",
-                                                            "data-path": path,
-                                                        },
-                                                        "data": title
-                                                    }, null, true);
-                                                    $(this).dialog("close");
-                                                }
-                                            },
-                                            'Cancel': function() {
-                                                $(this).dialog("close");
-                                            }
-                                        }
-                                    });
-                                }
-                                $('#lubo_cm_etb_create_page_form_validate_tips', self.createPageDialog).text('All fields are required.');
-                                $('input[name=title]', self.createPageDialog).attr('value', '');
-                                $('input[name=path]', self.createPageDialog).attr('value', node.attr('data-path'));
-                                self.createPageDialog.dialog("open");
-                            },
-                            "separator_after": true,
-                        };
-                        
-                        if (type == "page") {
-                            items["rename"] = {
-                                "label": "Rename",
-                                "action": function() {
-                                    this.rename(node);
-                                }
-                            };
-                        }
-                        
-                        if (type == "page" || type == "node") {
-                            items["delete"] = {
-                                "label": "Delete",
-                                "action": function() {
-                                    this.remove(node);
-                                }
-                            };
-                        }
-                        
-                        return items;
-                    },
-                },
-                "types": {
-                    "valid_children" : [ "root" ],
-                    "types": {
-                        "root": {
-                            "valid_children": ["node", "page"],
-                        },
-                        "node": {
-                            "icon": { "image": "/bundles/lubocontentmanager/img/icon_folder.png" },
-                            "valid_children" : [ "node", "page" ],
-                        },
-                        "page": {
-                            "icon": { "image": "/bundles/lubocontentmanager/img/icon_page.png" },
-                            "valid_children" : [],
-                        }
-                    }
-                },
-            }).bind("create.jstree", function (e, data) {
-                if (data.rslt.obj.attr("rel") != "page") {
-                    return;
-                }
-                
-                $.post(
-                    "/app_edit.php/_etb/pagetree/create", 
-                    {
-                        "path": data.rslt.obj.attr("data-path"),
-                        "position" : data.rslt.position,
-                        "title" : data.rslt.name,
-                    }, 
-                    function (r) {
-                        if(r.status) {
-                            data.inst.refresh();
-                        }
-                        else {
-                            $.jstree.rollback(data.rlbk);
-                            $('<div>The page could not be created! Do you have permission?</div>').dialog({
-                                modal: true,
-                                title: 'Error!',
-                                buttons: {
-                                    Ok: function() {
-                                        $(this).dialog("close");
-                                    }
-                                }
-                            });
-                        }
-                    }
-                );
-            }).bind("remove.jstree", function (e, data) {
-                data.rslt.obj.each(function () {
-                    var data = { "path": $(this).attr('data-path') };
-                    if ($(this).attr('rel') == "page") {
-                        data['id'] = this.id.replace("treenode_","");
-                    }
-                    $.ajax({
-                        async : false,
-                        type: 'POST',
-                        url: "/app_edit.php/_etb/pagetree/remove",
-                        data : data, 
-                        success : function (r) {
-                            if(!r.status) {
-                                data.inst.refresh();
-                                $('<div>The page could not be deleted! Do you have permission?</div>').dialog({
-                                    modal: true,
-                                    title: 'Error!',
-                                    buttons: {
-                                        Ok: function() {
-                                            $(this).dialog("close");
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    });
-                });
-            })
-            .bind("rename.jstree", function (e, data) {
-                $.post(
-                    "/app_edit.php/_etb/pagetree/rename", 
-                    {
-                        "id" : $(data.rslt.obj).attr("id").replace("treenode_",""),
-                        "title" : data.rslt.new_name
-                    }, 
-                    function (r) {
-                        if(!r.status) {
-                            $.jstree.rollback(data.rlbk);
-                            $('<div>The page could not be renamed! Do you have permission?</div>').dialog({
-                                modal: true,
-                                title: 'Error!',
-                                buttons: {
-                                    Ok: function() {
-                                        $(this).dialog("close");
-                                    }
-                                }
-                            });
-                        } else {
-                            $(data.rslt.obj).attr("data-url", r.url);
-                            $(data.rslt.obj).attr("title", r.title);
-                        }
-                    }
-                );
-            })
-            .bind("move_node.jstree", function (e, data) {
-                data.rslt.o.each(function (i) {
-                    var position = data.rslt.cp + i;
-                    if (data.rslt.np == data.rslt.op || data.rslt.cp > $('li[rel=page]', $(this).parent()).index(this)) {
-                        position -= 1;
-                    }
-                    $.ajax({
-                        async : false,
-                        type: 'POST',
-                        url: "/app_edit.php/_etb/pagetree/move",
-                        data : {
-                            "id" : $(this).attr("id").replace("treenode_",""), 
-                            "path" : $(data.rslt.np).attr("data-path"), 
-                            "position" : position,
-                        },
-                        success : function (r) {
-                            if(!r.status) {
-                                $.jstree.rollback(data.rlbk);
-                                $('<div>The page could not be moved! Do you have permission?</div>').dialog({
-                                    modal: true,
-                                    title: 'Error!',
-                                    buttons: {
-                                        Ok: function() {
-                                            $(this).dialog("close");
-                                        }
-                                    }
-                                });
-                            }
-                            else {
-                                $(data.rslt.oc).attr("id", "treenode_" + r.id);
-                                $(data.rslt.oc).attr("data-path", $(data.rslt.np).attr("data-path"));
-                                if(data.rslt.cy && $(data.rslt.oc).children("UL").length) {
-                                    data.inst.refresh(data.inst._get_parent(data.rslt.oc));
-                                }
-                            }
-                        }
-                    });
-                });
-            });
-            
-            $('#lubo_cm_etb_tool_navigation_container').dialog({
-                autoOpen: false,
-                buttons: {
-                    'Reload': function() {
-                        $(this).jstree("refresh");
-                    },
-                    'Close': function() {$(this).dialog('close');},
-                },
-                /*modal: true,*/
-                width: 400,
-            });
-            
-            var self = this;
-            
-            this.show = function() {
-                self.container.dialog('open');
-            };
-            
-            this.hide = function() {
-                self.container.dialog('close');
-            };
-            
-            this.toggle = function() {
-                if (self.container.dialog('isOpen')) {
-                    self.hide();
-                } else {
-                    self.show();
-                }
-            };
-        };
+        
         
         this.AreaTools = function(area) {
             this.container = $(area).parent();
@@ -535,6 +196,7 @@ if (typeof window.LuboCM == "undefined") {
              * SlotType interface
              */
             this.SlotTypeInterface = function() {};
+            this.SlotTypeInterface.prototype.slot_type = null;
             this.SlotTypeInterface.prototype.name = null;
             this.SlotTypeInterface.prototype.items = [];
             this.SlotTypeInterface.prototype.edit = false;
@@ -544,7 +206,7 @@ if (typeof window.LuboCM == "undefined") {
                 var toolbar = '<div class="lubo-cm-etb-area-slot-toolbar">'
                         + '<button>Delete</button>'
                         + (this.edit ? '<button>Edit</button>' : '');
-                toolbar += '</div>';
+                toolbar += '<span class="lubo-cm-etb-area-slot-info">Slot Type: '+this.slot_type+'</span></div>';
                 slot.prepend(toolbar);
                 toolbar = $('div:first', slot);
                 for (var i = 0,l = this.items.length; i < l; i++) {
@@ -602,191 +264,7 @@ if (typeof window.LuboCM == "undefined") {
                 }
             };
             
-            this.init = function() {
-                // Register slot types
-                this.registerSlotType({
-                    name: "raw_text",
-                    items: [],
-                    edit: function(ev) {
-                        var slot = ev.data.slot;
-                        var content = $('.lubo-cm-etb-area-slot-content', slot);
-                        var data = content.html();
-                        content.hide();
-                        slot.append(
-                            '<div class="lubo-cm-etb-area-slot-content-editor">'
-                            + '<textarea style="width:100%;height:60px;">'+data+'</textarea><br />'
-                            + '<button>Save</button> <button>Cancel</button>'
-                            + '</div>');
-                        var editor = $('.lubo-cm-etb-area-slot-content-editor', slot);
-                        $('button:first', editor).button({
-                            icons: { primary: "ui-icon-disk" }
-                        }).click(function(ev) {
-                            /* TODO: Save the form */
-                            $.post(
-                                '/app_edit.php/_etb/slot/raw_text/save',
-                                {
-                                    id: slot.attr('data-slot-id'),
-                                    data: $('textarea', editor).attr('value')
-                                },
-                                function(data, status) {
-                                    if (data.status) {
-                                        $(editor).remove();
-                                        content.html(data.html);
-                                        content.show();
-                                    } else {
-                                        $('<div>The slot could not be saved! Do you have permission?</div>').dialog({
-                                            modal: true,
-                                            title: 'Error!',
-                                            buttons: {
-                                                Ok: function() {
-                                                    $(this).dialog("close");
-                                                }
-                                            }
-                                        });
-                                    }
-                                },
-                                'json'
-                            );
-                        }).next().button({
-                            icons: { primary: "ui-icon-cancel" }
-                        }).click(function() {
-                            $(editor).remove();
-                            content.show();
-                        });
-                    }
-                });
-                
-                this.registerSlotType({
-                    name: "markdown",
-                    items: [],
-                    edit: function(ev) {
-                        var slot = ev.data.slot;
-                        var content = $('.lubo-cm-etb-area-slot-content', slot);
-                        var data = content.html();
-                        content.hide();
-                        slot.append(
-                            '<div class="lubo-cm-etb-area-slot-content-editor">'
-                            + '<p>For more info about the Markdown syntax, '
-                            + 'click <a href="http://daringfireball.net/projects/markdown/syntax" '
-                            + 'target="_blank">here</a></p>'
-                            + '<textarea style="width:100%;height:180px;">'+data+'</textarea><br />'
-                            + '<button>Save</button> <button>Cancel</button>'
-                            + '</div>');
-                        var editor = $('.lubo-cm-etb-area-slot-content-editor', slot);
-                        $('button:first', editor).button({
-                            icons: { primary: "ui-icon-disk" }
-                        }).click(function(ev) {
-                            /* TODO: Save the form */
-                            $.post(
-                                '/app_edit.php/_etb/slot/markdown/save',
-                                {
-                                    id: slot.attr('data-slot-id'),
-                                    data: $('textarea', editor).attr('value')
-                                },
-                                function(data, status) {
-                                    if (data.status) {
-                                        $(editor).remove();
-                                        content.html(data.html);
-                                        content.show();
-                                    } else {
-                                        $('<div>The slot could not be saved! Do you have permission?</div>').dialog({
-                                            modal: true,
-                                            title: 'Error!',
-                                            buttons: {
-                                                Ok: function() {
-                                                    $(this).dialog("close");
-                                                }
-                                            }
-                                        });
-                                    }
-                                },
-                                'json'
-                            );
-                        }).next().button({
-                            icons: { primary: "ui-icon-cancel" }
-                        }).click(function() {
-                            $(editor).remove();
-                            content.show();
-                        });
-                    }
-                });
-                
-                this.registerSlotType({
-                    name: "menu",
-                    items: [
-                        function(slot) {
-                            return $('<button>Configure</button>').button({
-                                icons: { primary: "ui-icon-gear" }
-                            }).click(function() {
-                                $.get(
-                                    '/app_edit.php/_etb/slot/menu/get_paths',
-                                    function(data) {
-                                        if (data.status) {
-                                            var panel = '<div><label>Select path:</label>'
-                                                + '<select>';
-                                            for (var i = 0, l = data.paths.length; i < l; i++) {
-                                                panel += '<option value="' + data.paths[i] + '">'
-                                                         + data.paths[i] + '</option>'
-                                            }
-                                            panel += '</select></div>';
-                                            $(panel).dialog({
-                                                modal: true,
-                                                title: 'Configure Menu Slot',
-                                                buttons: {
-                                                    Ok: function() {
-                                                        var self = this;
-                                                        $.post(
-                                                            '/app_edit.php/_etb/slot/menu/save',
-                                                            {
-                                                                id: $(slot).attr('data-slot-id'),
-                                                                path: $('select:first', this).val()
-                                                            },
-                                                            function(data) {
-                                                                if (!data.status) {
-                                                                    $('<div>Could not save menu configuration!</div>').dialog({
-                                                                        modal: true,
-                                                                        title: 'Error!',
-                                                                        buttons: {
-                                                                            Ok: function() {
-                                                                                $(this).dialog("close");
-                                                                            }
-                                                                        }
-                                                                    });
-                                                                } else {
-                                                                    $('.lubo-cm-etb-area-slot-content', slot).html(data.html);
-                                                                }
-                                                                $(self).dialog("close");
-                                                            },
-                                                            'json'
-                                                        );
-                                                    },
-                                                    Cancel: function() {
-                                                        $(this).dialog("close");
-                                                    }
-                                                }
-                                            });
-                                        } else {
-                                            $('<div>Could not load configuration panel!</div>').dialog({
-                                                modal: true,
-                                                title: 'Error!',
-                                                buttons: {
-                                                    Ok: function() {
-                                                        $(this).dialog("close");
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    },
-                                    'json'
-                                );
-                            });
-                        },
-                    ],
-                });
-                
-                // Load slot tools
-                this.load();
-            };
+            this.init = function() {};
             
             /**
              * Register a tool that handles a slot type

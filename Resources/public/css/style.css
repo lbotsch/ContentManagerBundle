@@ -230,7 +230,7 @@ header, footer {
 }
 header {
   padding-top: 30px;
-  height: 140px;
+  /*height: 140px;*/
 }
 #lang-switcher {
   float: right;

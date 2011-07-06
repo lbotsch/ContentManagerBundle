@@ -3,7 +3,11 @@ _etb:
     pattern: /_etb
     defaults: { _controller: lubo_content_manager.editor_controller:toolbarAction }
 
+
 # Pagetree
+_etb_pagetree_script:
+    pattern: /_etb/pagetree/script.js
+    defaults: { _controller: lubo_content_manager.pagetree_controller:getMainScriptAction }
 _etb_pagetree_get_children:
     pattern: /_etb/pagetree/get_children
     defaults: { _controller: lubo_content_manager.pagetree_controller:getChildrenAction }
@@ -23,7 +27,15 @@ _etb_pagetree_set_default:
     pattern: /_etb/pagetree/set_default
     defaults: { _controller: lubo_content_manager.pagetree_controller:setDefaultAction }
 
+# MediaManager
+_etb_media_manager_script:
+    pattern: /_etb/media/script.js
+    defaults: { _controller: lubo_content_manager.media_manager_controller:getMainScriptAction }
+
 # Area Tools
+_etb_area_slot_editors_script:
+    pattern: /_etb/slot/editors.js
+    defaults: { _controller: lubo_content_manager.editor_controller:getSlotEditorsScriptAction }
 _etb_area_slot_create:
     pattern: /_etb/slot/create
     defaults: { _controller: lubo_content_manager.editor_controller:createSlotAction }

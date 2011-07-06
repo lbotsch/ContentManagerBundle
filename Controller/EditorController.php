@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Lubo\ContentManagerBundle\Entity\Slot;
 use Lubo\ContentManagerBundle\Entity\Area;
 use Doctrine\ORM\NoResultException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class EditorController extends BaseController
 {
@@ -17,21 +18,49 @@ class EditorController extends BaseController
      */
     public function addStyle($url)
     {
-        $this->styles[] = $url;
+        try {
+            $m = array();
+            if (preg_match('/^route:(.+)$/', $url, $m)) {
+                $url = $this->get('router')->generate($m[1]);
+            }
+            $this->styles[] = $url;
+        } catch (RouteNotFoundException $e) {
+            // Use raw url
+            $this->get('logger')->error('EditorController(line '.__LINE__.') '.$e->getMessage());
+        }
     }
     
     public function addScript($url)
     {
-        $this->scripts[] = $url;
+        try {
+            $m = array();
+            if (preg_match('/^route:(.+)$/', $url, $m)) {
+                $url = $this->get('router')->generate($m[1]);
+            }
+            $this->scripts[] = $url;
+        } catch (RouteNotFoundException $e) {
+            $this->get('logger')->error('EditorController(line '.__LINE__.') '.$e->getMessage());
+        }
     }
     
     public function toolbarAction()
     {
-        $response = $this->container->get('templating')
+        $response = $this->get('templating')
             ->renderResponse('LuboContentManagerBundle:Editor:toolbar.html.twig', array(
             'scripts' => $this->scripts,
             'styles' => $this->styles,
         ));
+        $response->headers->set('content-type', 'text/javascript');
+        return $response;
+    }
+    
+    public function getSlotEditorsScriptAction()
+    {
+        $slotEngine = $this->get('lubo_content_manager.slot_engine');
+        $response = $this->container->get('templating')
+            ->renderResponse('LuboContentManagerBundle:Editor:slot_editors_script.js.twig', array(
+                'controllers' => $slotEngine->getSlotControllers(),
+            ));
         $response->headers->set('content-type', 'text/javascript');
         return $response;
     }

@@ -1,0 +1,11 @@
+/* Slot Editors */
+if (typeof LuboCM != "undefined") {
+    {% for controller in controllers %}
+    /* SlotType: {{ controller.getName() }} */
+    {{ controller.renderEditor()|raw }}
+    
+    {% endfor %}
+    
+    /* Load SlotEditor toolbars */
+    LuboCM.SlotTools.load();
+}

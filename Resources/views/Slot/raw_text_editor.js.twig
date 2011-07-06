@@ -1,0 +1,53 @@
+
+LuboCM.SlotTools.registerSlotType({
+    name: "raw_text",
+    slot_type: "Raw Text",
+    items: [],
+    edit: function(ev) {
+        var slot = ev.data.slot;
+        var content = $('.lubo-cm-etb-area-slot-content', slot);
+        var data = content.html();
+        content.hide();
+        slot.append(
+            '<div class="lubo-cm-etb-area-slot-content-editor">'
+            + '<textarea style="width:100%;height:60px;">'+data+'</textarea><br />'
+            + '<button>Save</button> <button>Cancel</button>'
+            + '</div>');
+        var editor = $('.lubo-cm-etb-area-slot-content-editor', slot);
+        $('button:first', editor).button({
+            icons: { primary: "ui-icon-disk" }
+        }).click(function(ev) {
+            /* TODO: Save the form */
+            $.post(
+                '/app_edit.php/_etb/slot/raw_text/save',
+                {
+                    id: slot.attr('data-slot-id'),
+                    data: $('textarea', editor).attr('value')
+                },
+                function(data, status) {
+                    if (data.status) {
+                        $(editor).remove();
+                        content.html(data.html);
+                        content.show();
+                    } else {
+                        $('<div>The slot could not be saved! Do you have permission?</div>').dialog({
+                            modal: true,
+                            title: 'Error!',
+                            buttons: {
+                                Ok: function() {
+                                    $(this).dialog("close");
+                                }
+                            }
+                        });
+                    }
+                },
+                'json'
+            );
+        }).next().button({
+            icons: { primary: "ui-icon-cancel" }
+        }).click(function() {
+            $(editor).remove();
+            content.show();
+        });
+    }
+});

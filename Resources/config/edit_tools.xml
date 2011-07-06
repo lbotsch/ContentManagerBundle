@@ -8,6 +8,7 @@
         <parameter key="lubo_content_manager.editor_toolbar.class">Lubo\ContentManagerBundle\EventListener\EditorToolbarListener</parameter>
         <parameter key="lubo_content_manager.editor_controller.class">Lubo\ContentManagerBundle\Controller\EditorController</parameter>
         <parameter key="lubo_content_manager.pagetree_controller.class">Lubo\ContentManagerBundle\Controller\PagetreeController</parameter>
+        <parameter key="lubo_content_manager.media_manager_controller.class">Lubo\ContentManagerBundle\Controller\MediaManagerController</parameter>
     </parameters>
 
     <services>
@@ -28,6 +29,12 @@
             </call>
             <call method="setDefaultPageType">
                 <argument type="string">%lubo_content_manager.default_page_type%</argument>
+            </call>
+        </service>
+        
+        <service id="lubo_content_manager.media_manager_controller" class="%lubo_content_manager.media_manager_controller.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
             </call>
         </service>
     </services>
